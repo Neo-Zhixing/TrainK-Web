@@ -10,27 +10,22 @@ export class RemoteMapData {
     this.stations = []
   }
   getConfiguration () {
-    if (this.configuration) {
-      return new Promise((resolve, reject) => {
-        resolve(this.configuration)
-      })
-    }
-
-    return this.server.get('info')
-      .then(response => {
-        this.configuration = response.data
-        const frame = this.configuration.frame
-        this.configuration.frame = models.Rect.fromFrame(
-          frame.minX,
-          frame.minY,
-          frame.maxX,
-          frame.maxY,
-        ).scale(this.configuration.spacing)
-        return this.configuration
-      })
+    if (!this._configuration)
+      this._configuration = this.server.get('info')
+        .then(response => {
+          const config = response.data
+          config.frame = models.Rect.fromFrame(
+            config.frame.minX,
+            config.frame.minY,
+            config.frame.maxX,
+            config.frame.maxY,
+          ).scale(config.spacing)
+          return config
+        })
+    return this._configuration
   }
 
-  getIconForStationLevel (level) {
+  getStationIconForLevel (level) {
     const iconURLs = {
       [models.StationLevel.Intercity]: require('@/assets/intercity.svg'),
       [models.StationLevel.Interchange]: require('@/assets/interchange.svg'),
@@ -43,8 +38,10 @@ export class RemoteMapData {
       })
   }
   loadMap (rect) {
+    let spacing = null
     return this.getConfiguration()
       .then(config => {
+        spacing = config.spacing
         return this.server.get(
           rect.scale(1 / config.spacing).toString(),
         )
@@ -54,16 +51,16 @@ export class RemoteMapData {
           .forEach(value => {
             Object.setPrototypeOf(value, models.Node.prototype)
             Object.setPrototypeOf(value.position, models.Point.prototype)
-            value.position.scale(this.configuration.spacing)
+            value.position.scale(spacing)
           })
         response.data.stations
           .forEach(value => {
             Object.setPrototypeOf(value, models.Station.prototype)
             Object.setPrototypeOf(value.position, models.Point.prototype)
-            value.position.scale(this.configuration.spacing)
+            value.position.scale(spacing)
           })
-        this.nodes = this.nodes.concat(response.data.nodes)
-        this.stations = this.stations.concat(response.data.stations)
+        this.nodes = response.data.nodes
+        this.stations = response.data.stations
       })
   }
   nodesInRect (rect) {

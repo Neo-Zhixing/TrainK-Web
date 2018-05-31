@@ -41,7 +41,7 @@ export default {
       this.$el.scrollLeft -= event.movementX
     },
     loadMap () {
-      this.map.drawMap(new models.Rect(
+      this.map.loadMap(new models.Rect(
         new models.Point(this.$el.scrollLeft, this.$el.scrollTop),
         new models.Size(this.$el.offsetWidth, this.$el.offsetHeight),
       ))
@@ -55,5 +55,8 @@ export default {
   overflow: scroll;
   cursor: grab;
   flex: 1;
+}
+#metromap-container > svg > * {
+  cursor: pointer;
 }
 </style>

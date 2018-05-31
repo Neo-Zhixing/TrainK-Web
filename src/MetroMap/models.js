@@ -112,17 +112,18 @@ export const SegmentShape = Object.freeze({
 })
 
 export class Segment {
-  constructor (from, to, shape = SegmentShape.Triangle) {
+  constructor (from, to, length = 1, shape = SegmentShape.Triangle) {
     this.from = from
     this.to = to
+    this.length = length
     this.shape = shape
   }
 }
 
 export class Line {
-  constructor (id, name = '', segments = []) {
+  constructor (id, name = '', attr = {}) {
     this.id = id
     this.name = name
-    this.segments = segments
+    this.attr = attr
   }
 }

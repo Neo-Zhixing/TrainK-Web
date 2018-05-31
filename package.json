@@ -37,7 +37,8 @@
       "@vue/standard"
     ],
     "rules": {
-      "comma-dangle": ["warn", "only-multiline"]
+      "comma-dangle": ["warn", "only-multiline"],
+      "curly": ["warn", "multi"]
     },
     "parserOptions": {
       "parser": "babel-eslint"
