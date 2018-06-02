@@ -9,7 +9,6 @@ export default class StationComp extends MapComp {
     return this.map
       .getStationIconSymbolForLevel(this.station.level)
       .then(symbol => {
-        console.log('rrr')
         return this.container
           .use(symbol)
           .id('station-' + this.station.id)

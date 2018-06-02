@@ -1,13 +1,11 @@
 import axios from 'axios'
-import * as models from './models'
+import * as models from '.'
 
-export class RemoteMapData {
+export class DefaultDataLoader {
   constructor (URL) {
     this.server = axios.create({
       baseURL: URL,
     })
-    this.nodes = []
-    this.stations = []
   }
   getConfiguration () {
     if (!this._configuration)
@@ -26,6 +24,7 @@ export class RemoteMapData {
   }
 
   getStationIconForLevel (level) {
+    // TODO: Determining the icon to use based on config fetched from server
     const iconURLs = {
       [models.StationLevel.Intercity]: require('@/assets/intercity.svg'),
       [models.StationLevel.Interchange]: require('@/assets/interchange.svg'),
@@ -38,6 +37,8 @@ export class RemoteMapData {
       })
   }
   loadMap (rect) {
+    // TODO: Never load cached data.
+    // Maintain a loaded-area map; only request not-yet-loaded data
     let spacing = null
     return this.getConfiguration()
       .then(config => {
@@ -53,20 +54,15 @@ export class RemoteMapData {
             Object.setPrototypeOf(value.position, models.Point.prototype)
             value.position.scale(spacing)
           })
+        models.Node.objects.bulkPut(response.data.nodes)
         response.data.stations
           .forEach(value => {
             Object.setPrototypeOf(value, models.Station.prototype)
             Object.setPrototypeOf(value.position, models.Point.prototype)
             value.position.scale(spacing)
           })
-        this.nodes = response.data.nodes
-        this.stations = response.data.stations
+        models.Station.objects.bulkPut(response.data.stations)
+        return response.data
       })
-  }
-  nodesInRect (rect) {
-    return this.nodes.concat(this.stations)
-  }
-  stationsInRect (rect) {
-    return this.stations
   }
 }

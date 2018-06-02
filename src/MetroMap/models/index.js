@@ -1,3 +1,16 @@
+import Dexie from 'dexie'
+
+const db = new Dexie('MetroMap')
+db.version(1)
+  .stores({
+    nodes: 'id++, position.x, position.y',
+    stations: 'id++, position.x, position.y, name, level',
+    lines: 'id++, name',
+    segments: 'id++, from, to, line',
+  })
+
+export const Database = db
+
 export class Point {
   constructor (x, y) {
     this.x = x || 0
@@ -7,6 +20,9 @@ export class Point {
     this.x *= value
     this.y *= value
     return this
+  }
+  [Symbol.iterator] () {
+    return [this.x, this.y]
   }
 }
 
@@ -81,8 +97,19 @@ export class Rect {
   }
 }
 
-export class Node {
+class Model {
+  static get objects () {
+    return db[this.dbName]
+  }
+  save () {
+    return this.constructor.objects.put(this)
+  }
+}
+
+export class Node extends Model {
+  static get dbName () { return 'nodes' }
   constructor (id, position) {
+    super()
     this.id = id
     this.position = position
   }
@@ -96,6 +123,7 @@ export const StationLevel = Object.freeze({
 })
 
 export class Station extends Node {
+  static get dbName () { return 'stations' }
   constructor (id, position, name = '', level = StationLevel.Minor) {
     super(id, position)
     this.name = name
@@ -112,18 +140,37 @@ export const SegmentShape = Object.freeze({
 })
 
 export class Segment {
+  static get dbName () { return 'segments' }
   constructor (from, to, length = 1, shape = SegmentShape.Triangle) {
     this.from = from
     this.to = to
     this.length = length
     this.shape = shape
   }
+  getNodes (id) {
+    return Station.objects.get(id)
+      .then(result => {
+        if (!result)
+          return Node.objects.get(id)
+        return result
+      })
+  }
+  get fromNode () {
+    return this.getNodes(this.from)
+  }
+  get toNode () {
+    return this.getNodes(this.to)
+  }
 }
 
 export class Line {
+  static get dbName () { return 'lines' }
   constructor (id, name = '', attr = {}) {
     this.id = id
     this.name = name
     this.attr = attr
   }
 }
+
+for (const cls of [Node, Station, Line, Segment])
+  db[cls.dbName].mapToClass(cls)

@@ -1,39 +1,44 @@
 import * as SVG from 'svg.js'
-import { RemoteMapData } from './MapData'
+import { DefaultDataLoader } from './models/DataLoader'
 
 import Station from './components/Station'
+// import Segment from './components/Segment'
 
 export default class MetroMap {
   constructor (container) {
-    this.mapData = new RemoteMapData('http://localhost:8000/metromap/')
+    this.dataloader = new DefaultDataLoader('http://localhost:8000/metromap/')
     this.container = SVG(container).id('metromap')
     this.groups = {
       station: this.container.group().id('stations-group'),
       stationIconSymbols: this.container.group().id('station-icons'),
+      segment: this.container.group().id('segments-group')
     }
-    this.mapData.getConfiguration()
+    this.dataloader.getConfiguration()
       .then(config => {
         this.container.size(config.frame.maxX, config.frame.maxY)
       })
   }
 
   loadMap (rect) {
-    if (!this._stationDrawers) this._stationDrawers = new Map()
-    this.mapData.loadMap(rect)
-      .then(() => {
-        for (const node of this.mapData.stationsInRect(rect)) {
-          let stationDrawer = this._stationDrawers.get(node.id) || new Station(this, this.groups.station, node)
+    if (!this.stationDrawers) this.stationDrawers = new Map()
+    this.dataloader.loadMap(rect)
+      .then(data => {
+        for (const node of data.stations) {
+          const stationDrawer = this.stationDrawers.get(node.id) || new Station(this, this.groups.station, node)
           stationDrawer.display = true
-          this._stationDrawers.set(node.id, stationDrawer)
+          this.stationDrawers.set(node.id, stationDrawer)
         }
+        // for (const segment of data.segments) {
+        //   const segmentDrawer = this.segmentDrawers.get(segment.id) || new Segment(this.this.groups.segment, segment)
+        // }
       })
   }
 
   getStationIconSymbolForLevel (level) {
-    if (!this._stationIconSymbols) this._stationIconSymbols = new Map()
-    let symbolPromise = this._stationIconSymbols.get(level)
+    if (!this.stationIconSymbols) this.stationIconSymbols = new Map()
+    let symbolPromise = this.stationIconSymbols.get(level)
     if (symbolPromise) return symbolPromise
-    symbolPromise = this.mapData.getStationIconForLevel(level)
+    symbolPromise = this.dataloader.getStationIconForLevel(level)
       .then(svgStr => {
         return this.groups.stationIconSymbols
           .symbol()
@@ -41,7 +46,7 @@ export default class MetroMap {
           .svg(svgStr)
       })
 
-    this._stationIconSymbols.set(level, symbolPromise)
+    this.stationIconSymbols.set(level, symbolPromise)
     return symbolPromise
   }
 }
