@@ -1,18 +1,22 @@
 import * as SVG from 'svg.js'
+import 'svg.path.js/svg.path.js'
 import { DefaultDataLoader } from './models/DataLoader'
 
 import Station from './components/Station'
-// import Segment from './components/Segment'
+import Segment from './components/Segment'
 
 export default class MetroMap {
   constructor (container) {
     this.dataloader = new DefaultDataLoader('http://localhost:8000/metromap/')
     this.container = SVG(container).id('metromap')
-    this.groups = {
-      station: this.container.group().id('stations-group'),
-      stationIconSymbols: this.container.group().id('station-icons'),
-      segment: this.container.group().id('segments-group')
+    this.groups = {}
+    this.drawers = {}
+    for (const key of ['stations', 'segments']) {
+      this.drawers[key] = new Map()
+      this.groups[key] = this.container.group().id(key)
     }
+
+    this.stationIconSymbols = this.container.group().id('station-icons')
     this.dataloader.getConfiguration()
       .then(config => {
         this.container.size(config.frame.maxX, config.frame.maxY)
@@ -20,33 +24,34 @@ export default class MetroMap {
   }
 
   loadMap (rect) {
-    if (!this.stationDrawers) this.stationDrawers = new Map()
+    const drawerConstructorMappings = {
+      stations: Station,
+      segments: Segment
+    }
     this.dataloader.loadMap(rect)
       .then(data => {
-        for (const node of data.stations) {
-          const stationDrawer = this.stationDrawers.get(node.id) || new Station(this, this.groups.station, node)
-          stationDrawer.display = true
-          this.stationDrawers.set(node.id, stationDrawer)
-        }
-        // for (const segment of data.segments) {
-        //   const segmentDrawer = this.segmentDrawers.get(segment.id) || new Segment(this.this.groups.segment, segment)
-        // }
+        for (const key in this.groups)
+          for (const element of data[key]) {
+            const drawer = this.drawers[key].get(element.id) ||
+              new (drawerConstructorMappings[key])(this, this.groups[key], element)
+            drawer.display = true
+            this.drawers[key].set(element.id, drawer)
+          }
       })
   }
 
   getStationIconSymbolForLevel (level) {
-    if (!this.stationIconSymbols) this.stationIconSymbols = new Map()
-    let symbolPromise = this.stationIconSymbols.get(level)
+    if (!this.stationIconPromises) this.stationIconPromises = new Map()
+    let symbolPromise = this.stationIconPromises.get(level)
     if (symbolPromise) return symbolPromise
     symbolPromise = this.dataloader.getStationIconForLevel(level)
-      .then(svgStr => {
-        return this.groups.stationIconSymbols
-          .symbol()
-          .id('station-icon-ref-' + level)
-          .svg(svgStr)
-      })
+      .then(svgStr => this.stationIconSymbols
+        .symbol()
+        .id('station-icon-ref-' + level)
+        .svg(svgStr)
+      )
 
-    this.stationIconSymbols.set(level, symbolPromise)
+    this.stationIconPromises.set(level, symbolPromise)
     return symbolPromise
   }
 }

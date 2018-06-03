@@ -6965,6 +6965,10 @@ svg.js@^2.6.5:
   version "2.6.5"
   resolved "https://registry.yarnpkg.com/svg.js/-/svg.js-2.6.5.tgz#5b93d0c8c11e2b70812ef9de1562aa91975cc3b6"
 
+"svg.path.js@https://github.com/otm/svg.path.js":
+  version "0.6.2"
+  resolved "https://github.com/otm/svg.path.js#6981166831ac663cf5e43d492b3c0266365ca829"
+
 svgo@^0.7.0:
   version "0.7.2"
   resolved "https://registry.yarnpkg.com/svgo/-/svgo-0.7.2.tgz#9f5772413952135c6fefbf40afe6a4faa88b4bb5"

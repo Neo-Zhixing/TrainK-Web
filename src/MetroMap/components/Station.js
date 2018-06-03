@@ -8,11 +8,10 @@ export default class StationComp extends MapComp {
   draw () {
     return this.map
       .getStationIconSymbolForLevel(this.station.level)
-      .then(symbol => {
-        return this.container
-          .use(symbol)
-          .id('station-' + this.station.id)
-          .move(this.station.position.x, this.station.position.y)
-      })
+      .then(symbol => this.container
+        .use(symbol)
+        .id('station-' + this.station.id)
+        .move(this.station.position.x, this.station.position.y)
+      )
   }
 }

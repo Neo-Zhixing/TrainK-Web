@@ -48,20 +48,18 @@ export class DefaultDataLoader {
         )
       })
       .then(response => {
-        response.data.nodes
-          .forEach(value => {
-            Object.setPrototypeOf(value, models.Node.prototype)
+        for (const key of ['nodes', 'stations'])
+          response.data[key].forEach(value => {
             Object.setPrototypeOf(value.position, models.Point.prototype)
             value.position.scale(spacing)
           })
-        models.Node.objects.bulkPut(response.data.nodes)
-        response.data.stations
-          .forEach(value => {
-            Object.setPrototypeOf(value, models.Station.prototype)
-            Object.setPrototypeOf(value.position, models.Point.prototype)
-            value.position.scale(spacing)
-          })
-        models.Station.objects.bulkPut(response.data.stations)
+
+        for (const key in models.Mapping) {
+          const cls = models.Mapping[key]
+          response.data[key]
+            .forEach(value => Object.setPrototypeOf(value, cls.prototype))
+          cls.objects.bulkPut(response.data[key])
+        }
         return response.data
       })
   }

@@ -22,7 +22,7 @@ export class Point {
     return this
   }
   [Symbol.iterator] () {
-    return [this.x, this.y]
+    return [this.x, this.y].values()
   }
 }
 
@@ -97,7 +97,7 @@ export class Rect {
   }
 }
 
-class Model {
+export class Model {
   static get objects () {
     return db[this.dbName]
   }
@@ -112,6 +112,11 @@ export class Node extends Model {
     super()
     this.id = id
     this.position = position
+  }
+  getPosition () {
+    if (Object.getPrototypeOf(this.position) !== Point.prototype)
+      Object.setPrototypeOf(this.position, Point.prototype)
+    return this.position
   }
 }
 
@@ -139,9 +144,10 @@ export const SegmentShape = Object.freeze({
   Straight: 4,
 })
 
-export class Segment {
+export class Segment extends Model {
   static get dbName () { return 'segments' }
   constructor (from, to, length = 1, shape = SegmentShape.Triangle) {
+    super()
     this.from = from
     this.to = to
     this.length = length
@@ -155,22 +161,29 @@ export class Segment {
         return result
       })
   }
-  get fromNode () {
+  fromNode () {
     return this.getNodes(this.from)
   }
-  get toNode () {
+  toNode () {
     return this.getNodes(this.to)
   }
-}
-
-export class Line {
-  static get dbName () { return 'lines' }
-  constructor (id, name = '', attr = {}) {
-    this.id = id
-    this.name = name
-    this.attr = attr
+  getLine () {
+    return Line.objects.get(this.line)
   }
 }
 
-for (const cls of [Node, Station, Line, Segment])
+export class Line extends Model {
+  static get dbName () { return 'lines' }
+  constructor (id, name = '', attrs = {}) {
+    super()
+    this.id = id
+    this.name = name
+    this.attrs = attrs
+  }
+}
+
+export const Mapping = {}
+for (const cls of [Node, Station, Line, Segment]) {
   db[cls.dbName].mapToClass(cls)
+  Mapping[cls.dbName] = cls
+}
