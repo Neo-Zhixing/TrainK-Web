@@ -4,6 +4,7 @@
     @mousedown="mousedown"
     @mouseup="mouseup"
     @mousemove="(dragging ? dragged:moved)($event)"
+    @wheel.prevent="wheel"
   />
 </template>
 
@@ -15,12 +16,18 @@ export default {
   data () {
     return {
       map: null,
-      dragging: false
+      dragging: false,
+      scale: 1,
     }
   },
   mounted () {
     this.map = new MetroMap(this.$el)
     this.loadMap()
+  },
+  watch: {
+    scale (newValue) {
+      this.map.zoom(newValue)
+    }
   },
   methods: {
     mouseup (event) {
@@ -29,6 +36,9 @@ export default {
     },
     mousedown (event) {
       this.dragging = true
+    },
+    wheel (event) {
+      this.scale += event.deltaY * 0.01
     },
     scrolled (event) {
       // Load the map on a displacement-based interval

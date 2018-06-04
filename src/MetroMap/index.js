@@ -20,6 +20,13 @@ export default class MetroMap {
     this.dataloader.getConfiguration()
       .then(config => {
         this.container.size(config.frame.maxX, config.frame.maxY)
+        if (config.styles)
+          this.container.element('style')
+            .id(null)
+            .attr({type: 'text/css'})
+            .words(config.styles)
+        for (const key of ['title', 'desc', 'metadata'])
+          if (config[key]) this.container.element(key).id(null).words(config[key])
       })
   }
 
@@ -53,5 +60,8 @@ export default class MetroMap {
 
     this.stationIconPromises.set(level, symbolPromise)
     return symbolPromise
+  }
+  zoom (scale) {
+    this.container.transform({scale: scale})
   }
 }
