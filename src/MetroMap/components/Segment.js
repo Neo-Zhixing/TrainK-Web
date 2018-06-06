@@ -41,6 +41,17 @@ export default class SegmentComp extends MapComp {
     const dirX = dir(width)
     const dirY = dir(height)
     const radius = config.cornerRadius
+    const curveLeft = {
+      x: 0.5 * sqrt2 * radius * dirX + radius * dirX,
+      y: 0.5 * sqrt2 * radius * dirY
+    }
+    const curveLeftPoint = {x: radius * dirX, y: 0}
+    const curveRight = {
+      x: 0.5 * sqrt2 * radius * dirX,
+      y: 0.5 * sqrt2 * radius * dirY + radius * dirY
+    }
+    const curveRightPoint = {x: 0, y: radius * dirY}
+
     switch (this.segment.shape) {
       case SegmentShape.Straight:
         return path.L(to)
@@ -48,24 +59,12 @@ export default class SegmentComp extends MapComp {
         if (absWidth > absHeight)
           return path
             .h(width - (absHeight + radius) * dirX)
-            .q(
-              {x: radius * dirX, y: 0},
-              {
-                x: 0.5 * sqrt2 * radius * dirX + radius * dirX,
-                y: 0.5 * sqrt2 * radius * dirY
-              }
-            )
+            .q(curveLeftPoint, curveLeft)
             .L(to)
         else
           return path
             .v(height - (absWidth + radius) * dirY)
-            .q(
-              {x: 0, y: radius * dirY},
-              {
-                x: 0.5 * sqrt2 * radius * dirX,
-                y: 0.5 * sqrt2 * radius * dirY + radius * dirY
-              }
-            )
+            .q(curveRightPoint, curveRight)
             .L(to)
       case SegmentShape.Square:
         const targetPoint = {x: radius * dirX, y: radius * dirY}
@@ -73,17 +72,29 @@ export default class SegmentComp extends MapComp {
           return path
             .h(width - radius * dirX)
             .q(
-              {x: radius * dirX, y: 0},
+              curveLeftPoint,
               targetPoint
             )
             .L(to)
         else
           return path
             .v(height - radius * dirY)
-            .q(
-              {x: 0, y: radius * dirY},
-              targetPoint
-            )
+            .q(curveRightPoint, targetPoint)
+            .L(to)
+      case SegmentShape.Parallel:
+        if (absWidth > absHeight)
+          return path
+            .h((width - absHeight * dirX) / 2 - radius * dirX)
+            .q(curveLeftPoint, curveLeft)
+            .l({x: (absHeight - sqrt2 * radius) * dirX, y: height - sqrt2 * radius * dirY})
+            .q({x: 0.5 * sqrt2 * radius * dirX, y: 0.5 * sqrt2 * radius * dirY}, curveLeft)
+            .L(to)
+        else
+          return path
+            .v((height - absWidth * dirY) / 2 - radius * dirY)
+            .q(curveRightPoint, curveRight)
+            .l({x: (absWidth - sqrt2 * radius) * dirY, y: width - sqrt2 * radius * dirX})
+            .q({x: 0.5 * sqrt2 * radius * dirY, y: 0.5 * sqrt2 * radius * dirX}, curveRight)
             .L(to)
       default:
         return path
