@@ -9,6 +9,8 @@ export default class MetroMap {
   constructor (container) {
     this.dataloader = new DefaultDataLoader('http://localhost:8000/metromap/')
     this.container = SVG(container).id('metromap')
+    this.container.defs().id(null)
+    this.container.attr({'preserveAspectRatio': 'xMidYMid slice'})
     this.groups = {}
     this.drawers = {}
     for (const key of ['stations', 'segments']) {
@@ -19,7 +21,12 @@ export default class MetroMap {
     this.stationIconSymbols = this.container.group().id('station-icons')
     this.dataloader.getConfiguration()
       .then(config => {
-        this.container.size(config.frame.maxX, config.frame.maxY)
+        this.visibleRect = config.frame
+        this.container.rect()
+          .move(...this.visibleRect.origin)
+          .size(...this.visibleRect.size)
+          .attr({'fill': 'none', 'stroke-width': 10})
+        this.updateViewbox()
         if (config.styles)
           this.container.element('style')
             .id(null)
@@ -27,15 +34,16 @@ export default class MetroMap {
             .words(config.styles)
         for (const key of ['title', 'desc', 'metadata'])
           if (config[key]) this.container.element(key).id(null).words(config[key])
+        this.loadMap()
       })
   }
 
-  loadMap (rect) {
+  loadMap () {
     const drawerConstructorMappings = {
       stations: Station,
       segments: Segment
     }
-    this.dataloader.loadMap(rect)
+    this.dataloader.loadMap(this.visibleRect)
       .then(data => {
         for (const key in this.groups)
           for (const element of data[key]) {
@@ -61,7 +69,29 @@ export default class MetroMap {
     this.stationIconPromises.set(level, symbolPromise)
     return symbolPromise
   }
-  zoom (scale) {
-    this.container.transform({scale: scale})
+
+  updateViewbox () {
+    const rect = this.visibleRect
+    this.container.viewbox({
+      x: rect.origin.x,
+      y: rect.origin.y,
+      width: rect.size.width,
+      height: rect.size.height,
+    })
+  }
+  zoom (scale, point) {
+    if (!scale && !point) return this.container.viewbox().zoom
+    point = this.container.point(point.x, point.y)
+    this.visibleRect.scaleAboutPoint(scale, point)
+    this.updateViewbox()
+  }
+  startMoving (from) {
+    this.movingOrigin = this.container.point(from.x, from.y)
+  }
+  moveTo (to) {
+    to = this.container.point(to.x, to.y)
+    this.visibleRect.origin.x += this.movingOrigin.x - to.x
+    this.visibleRect.origin.y += this.movingOrigin.y - to.y
+    this.updateViewbox()
   }
 }

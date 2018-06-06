@@ -10,35 +10,37 @@
 
 <script>
 import MetroMap from '@/MetroMap'
-import * as models from '@/MetroMap/models'
+
+function pointForEvent (event) {
+  return { x: event.clientX, y: event.clientY }
+}
 
 export default {
   data () {
     return {
       map: null,
       dragging: false,
-      scale: 1,
     }
   },
   mounted () {
     this.map = new MetroMap(this.$el)
-    this.loadMap()
-  },
-  watch: {
-    scale (newValue) {
-      this.map.zoom(newValue)
-    }
   },
   methods: {
     mouseup (event) {
-      if (this.dragging) this.loadMap()
+      if (this.dragging) this.map.loadMap()
       this.dragging = false
     },
     mousedown (event) {
       this.dragging = true
+      this.map.startMoving(pointForEvent(event))
     },
     wheel (event) {
-      this.scale += event.deltaY * 0.01
+      let scale = event.deltaY * 0.001
+      if (event.deltaMode === 1)
+        scale *= 20 // For compatibility issues on Firefox
+      scale += 1
+      if (scale < 0.1) scale = 0.1
+      this.map.zoom(scale, pointForEvent(event))
     },
     scrolled (event) {
       // Load the map on a displacement-based interval
@@ -47,24 +49,27 @@ export default {
       // Don't have an idea about what to do with it for now.
     },
     dragged (event) {
-      this.$el.scrollTop -= event.movementY
-      this.$el.scrollLeft -= event.movementX
+      this.map.moveTo(pointForEvent(event))
     },
-    loadMap () {
-      this.map.loadMap(new models.Rect(
-        new models.Point(this.$el.scrollLeft, this.$el.scrollTop),
-        new models.Size(this.$el.offsetWidth, this.$el.offsetHeight),
-      ))
-    }
   },
 }
 </script>
 
 <style>
+body {
+  height: 100vh;
+}
+#app {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
 #metromap-container{
-  overflow: scroll;
-  cursor: grab;
   flex: 1;
+  overflow: hidden;
+  cursor: grab;
+  user-select: none;
 }
 #metromap-container > svg > * {
   cursor: pointer;

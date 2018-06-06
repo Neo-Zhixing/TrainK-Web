@@ -19,13 +19,6 @@ export default {
 @import '~bootstrap-vue/dist/bootstrap-vue.css';
 body{
   min-height: 100vh;
-  min-width: 100vh;
-}
-#app{
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+  width: 100vw;
 }
 </style>

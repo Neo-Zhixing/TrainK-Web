@@ -12,12 +12,8 @@ export class DefaultDataLoader {
       this._configuration = this.server.get('info')
         .then(response => {
           const config = response.data
-          config.frame = models.Rect.fromFrame(
-            config.frame.minX,
-            config.frame.minY,
-            config.frame.maxX,
-            config.frame.maxY,
-          ).scale(config.spacing)
+          config.frame = models.Rect.FromFrame(config.frame)
+          config.frame.scale(config.spacing)
           return config
         })
     return this._configuration
@@ -44,7 +40,7 @@ export class DefaultDataLoader {
       .then(config => {
         spacing = config.spacing
         return this.server.get(
-          rect.scale(1 / config.spacing).toString(),
+          rect.scaled(1 / config.spacing).toString(),
         )
       })
       .then(response => {

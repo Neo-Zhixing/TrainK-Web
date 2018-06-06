@@ -12,9 +12,9 @@ db.version(1)
 export const Database = db
 
 export class Point {
-  constructor (x, y) {
-    this.x = x || 0
-    this.y = y || 0
+  constructor (x = 0, y = 0) {
+    this.x = x
+    this.y = y
   }
   scale (value) {
     this.x *= value
@@ -24,25 +24,34 @@ export class Point {
   [Symbol.iterator] () {
     return [this.x, this.y].values()
   }
+  copy () {
+    return new Point(this.x, this.y)
+  }
 }
 
 export class Size {
-  constructor (width, height) {
-    this.width = width || 0
-    this.height = height || 0
+  constructor (width = 0, height = 0) {
+    this.width = width
+    this.height = height
   }
   scale (value) {
     this.width *= value
     this.height *= value
     return this
   }
+  [Symbol.iterator] () {
+    return [this.width, this.height].values()
+  }
+  copy () {
+    return new Size(this.width, this.height)
+  }
 }
 
 export class Rect {
-  static fromFrame (minX, minY, maxX, maxY) {
+  static FromFrame (value) {
     return new Rect(
-      new Point(minX, minY),
-      new Size(maxX - minX, maxY - minY),
+      new Point(value.minX, value.minY),
+      new Size(value.maxX - value.minX, value.maxY - value.minY),
     )
   }
   constructor (origin, size) {
@@ -87,13 +96,24 @@ export class Rect {
   toString () {
     return [this.minX, this.minY, this.maxX, this.maxY]
       .map(value => value.toFixed(2))
-      .join('-')
+      .join(':')
   }
-
+  copy () {
+    return new Rect(this.origin.copy(), this.size.copy())
+  }
   scale (value) {
     this.origin.scale(value)
     this.size.scale(value)
-    return this
+  }
+  scaled (value) {
+    const newRect = this.copy()
+    newRect.scale(value)
+    return newRect
+  }
+  scaleAboutPoint (scale, point) {
+    this.size.scale(scale)
+    this.origin.x += (this.origin.x - point.x) * (scale - 1)
+    this.origin.y += (this.origin.y - point.y) * (scale - 1)
   }
 }
 
