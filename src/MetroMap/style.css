@@ -1,0 +1,12 @@
+svg.metromap g#stations svg {
+  overflow: visible;
+}
+
+svg.metromap > * {
+  cursor: pointer;
+}
+
+svg.metromap {
+  cursor: grab;
+  user-select: none;
+}

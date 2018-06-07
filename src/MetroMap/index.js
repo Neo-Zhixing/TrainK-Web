@@ -5,15 +5,19 @@ import { DefaultDataLoader } from './models/DataLoader'
 import Station from './components/Station'
 import Segment from './components/Segment'
 
+import './style.css'
+
 export default class MetroMap {
   constructor (container) {
-    this.dataloader = new DefaultDataLoader('http://localhost:8000/metromap/')
-    this.container = SVG(container).id('metromap')
+    this.dataloader = new DefaultDataLoader('http://192.168.1.101:8000/metromap/')
+    this.container = SVG(container)
+      .id('metromap')
+      .attr({'preserveAspectRatio': 'xMidYMid slice'})
+      .addClass('metromap')
     this.container.defs().id(null)
-    this.container.attr({'preserveAspectRatio': 'xMidYMid slice'})
     this.groups = {}
     this.drawers = {}
-    for (const key of ['stations', 'segments']) {
+    for (const key of ['segments', 'stations']) {
       this.drawers[key] = new Map()
       this.groups[key] = this.container.group().id(key)
     }
@@ -22,10 +26,6 @@ export default class MetroMap {
     this.dataloader.getConfiguration()
       .then(config => {
         this.visibleRect = config.frame
-        this.container.rect()
-          .move(...this.visibleRect.origin)
-          .size(...this.visibleRect.size)
-          .attr({'fill': 'none', 'stroke-width': 10})
         this.updateViewbox()
         if (config.styles)
           this.container.element('style')

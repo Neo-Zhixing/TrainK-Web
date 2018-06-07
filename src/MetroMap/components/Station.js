@@ -10,16 +10,19 @@ export default class StationComp extends MapComp {
       .getStationIconSymbolForLevel(this.station.level)
       .then(symbol => {
         const group = this.container
-          .group()
+          .nested()
           .id('station-' + this.station.id)
-
-        group.use(symbol)
-          .id(null)
+          .attr({'style': null})
           .move(...this.station.getPosition())
 
-        group.plain(this.station.name)
+        this.icon = group.use(symbol)
           .id(null)
-          .move(...this.station.getPosition())
+        const iconBox = this.icon.bbox()
+        console.log(iconBox)
+        this.icon
+          .move(-iconBox.cx, -iconBox.cy)
+        this.label = group.plain(this.station.name)
+          .id(null)
         return group
       })
   }

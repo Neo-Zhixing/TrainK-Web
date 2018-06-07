@@ -68,10 +68,5 @@ body {
 #metromap-container{
   flex: 1;
   overflow: hidden;
-  cursor: grab;
-  user-select: none;
-}
-#metromap-container > svg > * {
-  cursor: pointer;
 }
 </style>
