@@ -25,7 +25,6 @@ export class DefaultDataLoader {
       [models.StationLevel.Intercity]: require('@/assets/intercity.svg'),
       [models.StationLevel.Interchange]: require('@/assets/interchange.svg'),
       [models.StationLevel.Major]: require('@/assets/major.svg'),
-      [models.StationLevel.Minor]: require('@/assets/minor.svg'),
     }
     return axios.get(iconURLs[level])
       .then(response => {
@@ -49,6 +48,13 @@ export class DefaultDataLoader {
             Object.setPrototypeOf(value.position, models.Point.prototype)
             value.position.scale(spacing)
           })
+
+        response.data.lines.forEach(line => {
+          line.attrs = Object.assign({
+            'color': '#333333',
+            'width': 10,
+          }, line.attrs)
+        })
 
         for (const key in models.Mapping) {
           const cls = models.Mapping[key]

@@ -1,6 +1,12 @@
 import MapComp from '.'
 import { SegmentShape } from '../models'
 
+function rename (object, key, newname) {
+  const value = object[key] || object[newname]
+  if (value) object[newname] = value
+  delete object[key]
+}
+
 export default class SegmentComp extends MapComp {
   constructor (map, container, segment) {
     super(map, container)
@@ -15,13 +21,12 @@ export default class SegmentComp extends MapComp {
     ])
       .then(values => {
         const [fromNode, toNode, line, config] = values
+        const attrs = line.attrs
+        rename(attrs, 'color', 'stroke')
+        rename(attrs, 'width', 'stroke-width')
         const path = this.container.path()
           .id('segment-' + this.segment.id)
-          .attr(Object.assign({
-            'stroke': '#333333',
-            'stroke-width': 5,
-            'fill': 'none',
-          }, line.attrs))
+          .attr(attrs)
         return this.drawSegment(
           path,
           fromNode.getPosition(),

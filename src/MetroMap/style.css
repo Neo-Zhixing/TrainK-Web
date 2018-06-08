@@ -1,6 +1,9 @@
 svg.metromap g#stations svg {
   overflow: visible;
 }
+svg.metromap g#segments path {
+  fill: none;
+}
 
 svg.metromap > * {
   cursor: pointer;

@@ -138,6 +138,19 @@ export class Node extends Model {
       Object.setPrototypeOf(this.position, Point.prototype)
     return this.position
   }
+  getSegments () {
+    return Segment.objects
+      .where('from').equals(this.id)
+      .or('to').equals(this.id) // For all the segments containing this node
+  }
+  getLines () {
+    // All the lines containing this node
+    // TODO: Optimizations
+    const lines = new Set()
+    return this.getSegments()
+      .each(segment => lines.add(segment.line))
+      .then(() => Line.objects.filter(line => lines.has(line.id)))
+  }
 }
 
 export const StationLevel = Object.freeze({
