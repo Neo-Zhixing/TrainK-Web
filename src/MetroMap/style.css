@@ -2,7 +2,7 @@ svg.metromap > g#segments > path {
   fill: none;
 }
 
-svg.metromap > * {
+svg.metromap > g#stations {
   cursor: pointer;
 }
 

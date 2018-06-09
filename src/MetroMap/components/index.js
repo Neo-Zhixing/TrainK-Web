@@ -2,23 +2,24 @@ export default class MapComp {
   constructor (map, container) {
     this.map = map
     this.container = container
-    this.element = null
   }
   get display () {
-    return this.element !== null
+    return this.drawTask !== undefined
   }
   set display (value) {
-    if (value && (this.element == null))
-      this.draw()
-        .then(element => {
-          this.element = element
-        })
-    else if (!value && (this.element != null)) {
-      this.element.remove()
-      this.elememt = null
-    }
+    if (value && !this.drawTask)
+      this.drawTask = this.draw()
+    else if (!value && this.drawTask)
+      this.drawTask.then(element => {
+        element.remove()
+        delete this.drawTask
+      })
   }
   draw () {
     return null
+  }
+
+  mapDidZoom (scale) {
+    this.display = true
   }
 }

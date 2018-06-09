@@ -39,15 +39,31 @@ export default class StationComp extends MapComp {
       .then(icon => {
         const iconBox = icon.bbox()
         // Setting up animations
+        let timeout = null
         stationContainer.on('mouseenter', () => {
-          stationContainer.animate(100, '>').scale(2, iconBox.cx, iconBox.cy)
+          clearTimeout(timeout)
+          timeout = setTimeout(
+            () => stationContainer
+              .animate(100, '>')
+              .scale(2, iconBox.cx, iconBox.cy),
+            75
+          )
         })
         stationContainer.on('mouseleave', () => {
-          stationContainer.animate(100, '>').scale(1, iconBox.cx, iconBox.cy)
+          clearTimeout(timeout)
+          timeout = setTimeout(
+            () => stationContainer
+              .animate(100, '>')
+              .scale(1, iconBox.cx, iconBox.cy),
+            75
+          )
         })
         // Draw the label
         this.label = stationContainer.plain(this.station.name).id(null)
         return stationContainer
       })
+  }
+  mapDidZoom (scale) {
+    this.display = scale > (3 - this.station.level) * 0.1
   }
 }

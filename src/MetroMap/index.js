@@ -45,12 +45,14 @@ export default class MetroMap {
     }
     this.dataloader.loadMap(this.visibleRect)
       .then(data => {
+        const currentScale = this.container.viewbox().zoom
         for (const key in this.groups)
           for (const element of data[key]) {
-            const drawer = this.drawers[key].get(element.id) ||
-              new (drawerConstructorMappings[key])(this, this.groups[key], element)
-            drawer.display = true
-            this.drawers[key].set(element.id, drawer)
+            const drawers = this.drawers[key]
+            if (drawers.has(element.id)) continue
+            const drawer = new (drawerConstructorMappings[key])(this, this.groups[key], element)
+            drawer.mapDidZoom(currentScale)
+            drawers.set(element.id, drawer)
           }
       })
   }
@@ -84,6 +86,9 @@ export default class MetroMap {
     point = this.container.point(point.x, point.y)
     this.visibleRect.scaleAboutPoint(scale, point)
     this.updateViewbox()
+    const newScale = this.container.viewbox().zoom
+    for (const key in this.drawers)
+      this.drawers[key].forEach(drawer => drawer.mapDidZoom(newScale))
   }
   startMoving (from) {
     this.movingOrigin = this.container.point(from.x, from.y)
