@@ -17,7 +17,7 @@ export default class StationComp extends MapComp {
           const stationHeight = 0.4
           this.icon = container.rect(lineWidth * stationWidth, lineWidth * stationHeight)
           const bbox = this.icon.bbox()
-          this.icon
+          return this.icon
             .fill('white')
             .move((0.5 - stationWidth) * lineWidth, -bbox.cy)
         })
@@ -26,17 +26,25 @@ export default class StationComp extends MapComp {
         // Use the symbol
         this.icon = container.use(symbol).id(null)
         const iconBox = this.icon.bbox()
-        this.icon.move(-iconBox.cx, -iconBox.cy)
+        return this.icon.move(-iconBox.cx, -iconBox.cy)
       })
   }
   draw () {
     const stationContainer = this.container
-      .nested()
+      .group()
       .id('station-' + this.station.id)
-      .attr({'style': null})
       .move(...this.station.getPosition())
+
     return this.drawStationIcon(stationContainer)
-      .then(symbol => {
+      .then(icon => {
+        const iconBox = icon.bbox()
+        // Setting up animations
+        stationContainer.on('mouseenter', () => {
+          stationContainer.animate(100, '>').scale(2, iconBox.cx, iconBox.cy)
+        })
+        stationContainer.on('mouseleave', () => {
+          stationContainer.animate(100, '>').scale(1, iconBox.cx, iconBox.cy)
+        })
         // Draw the label
         this.label = stationContainer.plain(this.station.name).id(null)
         return stationContainer

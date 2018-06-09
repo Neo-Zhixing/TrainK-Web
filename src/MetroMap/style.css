@@ -1,7 +1,4 @@
-svg.metromap g#stations svg {
-  overflow: visible;
-}
-svg.metromap g#segments path {
+svg.metromap > g#segments > path {
   fill: none;
 }
 
