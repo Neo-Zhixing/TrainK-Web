@@ -5,6 +5,7 @@ export default class StationComp extends MapComp {
   constructor (map, container, station) {
     super(map, container)
     this.station = station
+    this.takenDirs = new Set()
   }
   drawStationIcon (container) {
     if (this.station.level === models.StationLevel.Minor)
@@ -15,11 +16,15 @@ export default class StationComp extends MapComp {
           const lineWidth = line.attrs['width']
           const stationWidth = 0.7
           const stationHeight = 0.4
-          this.icon = container.rect(lineWidth * stationWidth, lineWidth * stationHeight)
-          const bbox = this.icon.bbox()
-          return this.icon
+          const dir = this.takenDirs.values().next().value
+
+          this.icon = container
+            .id(null)
+            .rect(lineWidth * stationWidth, lineWidth * stationHeight)
             .fill('white')
-            .move((0.5 - stationWidth) * lineWidth, -bbox.cy)
+            .move((0.5 - stationWidth) * lineWidth, -0.5 * lineWidth * stationHeight)
+            .rotate(dir * 45 + 90, 0, 0)
+          return this.icon
         })
     return this.map.getStationIconSymbolForLevel(this.station.level)
       .then(symbol => {
@@ -59,7 +64,7 @@ export default class StationComp extends MapComp {
           )
         })
         // Draw the label
-        this.label = stationContainer.plain(this.station.name).id(null)
+        this.label = stationContainer.plain(this.station.name + '|' + [...this.takenDirs.values()]).id(null)
         return stationContainer
       })
   }

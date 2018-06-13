@@ -9,7 +9,7 @@ import './style.css'
 
 export default class MetroMap {
   constructor (container) {
-    this.dataloader = new DefaultDataLoader('http://192.168.1.101:8000/metromap/')
+    this.dataloader = new DefaultDataLoader('http://192.168.1.10:8465/metromap/')
     this.container = SVG(container)
       .id('metromap')
       .attr({'preserveAspectRatio': 'xMidYMid slice'})
@@ -46,14 +46,16 @@ export default class MetroMap {
     this.dataloader.loadMap(this.visibleRect)
       .then(data => {
         const currentScale = this.container.viewbox().zoom
-        for (const key in this.groups)
+        for (const key in this.drawers)
           for (const element of data[key]) {
             const drawers = this.drawers[key]
             if (drawers.has(element.id)) continue
             const drawer = new (drawerConstructorMappings[key])(this, this.groups[key], element)
-            drawer.mapDidZoom(currentScale)
             drawers.set(element.id, drawer)
           }
+        for (const key in this.drawers)
+          for (const element of this.drawers[key].values())
+            element.mapDidZoom(currentScale)
       })
   }
 
@@ -72,6 +74,7 @@ export default class MetroMap {
     return symbolPromise
   }
 
+  // The following methods are being used to manipulate the viewbox
   updateViewbox () {
     const rect = this.visibleRect
     this.container.viewbox({
@@ -94,6 +97,7 @@ export default class MetroMap {
     this.movingOrigin = this.container.point(from.x, from.y)
   }
   moveTo (to) {
+    if (!this.movingOrigin) return
     to = this.container.point(to.x, to.y)
     this.visibleRect.origin.x += this.movingOrigin.x - to.x
     this.visibleRect.origin.y += this.movingOrigin.y - to.y
