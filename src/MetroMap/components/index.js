@@ -3,13 +3,11 @@ export default class MapComp {
     this.map = map
     this.container = container
   }
-  get display () {
-    return this.drawTask !== undefined
-  }
-  set display (value) {
-    if (value && !this.drawTask)
+  render () {
+    if (this.shouldRender && !this.drawTask) {
       this.drawTask = this.draw()
-    else if (!value && this.drawTask)
+      return this.drawTask
+    } else if (!this.shouldRender && this.drawTask)
       this.drawTask.then(element => {
         element.remove()
         delete this.drawTask
@@ -19,7 +17,7 @@ export default class MapComp {
     return null
   }
 
-  mapDidZoom (scale) {
-    this.display = true
+  get shouldRender () {
+    return true
   }
 }

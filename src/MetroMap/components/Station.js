@@ -16,11 +16,13 @@ export default class StationComp extends MapComp {
           const lineWidth = line.attrs['width']
           const stationWidth = 0.7
           const stationHeight = 0.4
-          const dir = this.takenDirs.values().next().value
+          let dir = 0
+          for (let i of this.takenDirs)
+            if (i > dir) dir = i
 
           this.icon = container
-            .id(null)
             .rect(lineWidth * stationWidth, lineWidth * stationHeight)
+            .id(null)
             .fill('white')
             .move((0.5 - stationWidth) * lineWidth, -0.5 * lineWidth * stationHeight)
             .rotate(dir * 45 + 90, 0, 0)
@@ -68,7 +70,7 @@ export default class StationComp extends MapComp {
         return stationContainer
       })
   }
-  mapDidZoom (scale) {
-    this.display = scale > (3 - this.station.level) * 0.1
+  get shouldRender () {
+    return this.map.zoom() > (3 - this.station.level) * 0.1
   }
 }
