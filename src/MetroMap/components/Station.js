@@ -66,7 +66,7 @@ export default class StationComp extends MapComp {
           )
         })
         // Draw the label
-        this.label = stationContainer.plain(this.station.name + '|' + [...this.takenDirs.values()]).id(null)
+        this.label = stationContainer.plain(this.station.name).id(null)
         return stationContainer
       })
   }

@@ -5,17 +5,17 @@ import { SegmentShape } from '../models'
 // Degree = direction * 45
 export const Direction = Object.freeze({
   Right: 0,
-  RightUp: 1,
-  Up: 2,
-  LeftUp: 3,
+  RightDown: 1,
+  Down: 2,
+  LeftDown: 3,
   Left: 4,
-  LeftDown: 5,
-  Down: 6,
-  RightDown: 7,
+  LeftUp: 5,
+  Up: 6,
+  RightUp: 7,
 })
 
 // The direction
-function directionForSegment (segment, origin) {
+function directionForSegment (segment, origin, reverse) {
   // Origin is (0,0) for relative drawings
   // TODO: BUGFIX
   if (segment.type === segment.type.toLowerCase())
@@ -24,22 +24,18 @@ function directionForSegment (segment, origin) {
     case 'h':
       return segment.coords[0] > origin[0] ? Direction.Right : Direction.Left
     case 'v':
-      return segment.coords[0] > origin[0] ? Direction.Up : Direction.Down
+      return segment.coords[0] > origin[0] ? Direction.Down : Direction.Up
     case 'l':
       const radian = Math.atan2(
         segment.coords[1] - origin[1],
         segment.coords[0] - origin[0]
       )
       let result = Math.round(4 * radian / Math.PI)
+      if (reverse) result += 4
       if (result < 0) result += 8
       if (result >= 8) result -= 8
       return result
   }
-}
-function rename (object, key, newname) {
-  const value = object[key] || object[newname]
-  if (value) object[newname] = value
-  delete object[key]
 }
 
 export default class SegmentComp extends MapComp {
@@ -79,7 +75,7 @@ export default class SegmentComp extends MapComp {
               coords[0] += pathSegment.coords[0]
               break
             case 'H':
-              coords[0] += pathSegment.coords[0]
+              coords[0] = pathSegment.coords[0]
               break
             case 'l':
             case 'm':
@@ -106,7 +102,8 @@ export default class SegmentComp extends MapComp {
           ),
           to: directionForSegment(
             path.getSegment(segmentCount - 1),
-            coords
+            coords,
+            true
           ),
         }
         const stationDrawers = this.map.drawers.stations
@@ -117,6 +114,11 @@ export default class SegmentComp extends MapComp {
         }
         // Generating line attributes
         const attrs = line.attrs
+        function rename (object, key, newname) {
+          const value = object[key] || object[newname]
+          if (value) object[newname] = value
+          delete object[key]
+        }
         rename(attrs, 'color', 'stroke')
         rename(attrs, 'width', 'stroke-width')
         return path.drawAnimated({
