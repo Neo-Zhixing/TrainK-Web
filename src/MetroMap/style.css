@@ -6,6 +6,11 @@ svg.metromap > g#stations {
   cursor: pointer;
 }
 
+svg.metromap > g#stations > g > text {
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
 svg.metromap {
   cursor: grab;
   user-select: none;

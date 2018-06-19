@@ -53,8 +53,7 @@ export default class MetroMap {
             drawers.set(element.id, drawer)
           }
         let renderPromise = Promise.resolve()
-        for (const key in this.drawers) {
-          console.log(key)
+        for (const key in this.drawers)
           renderPromise = renderPromise.then(() => {
             const elementDrawingPromises = []
             for (const element of this.drawers[key].values()) {
@@ -63,7 +62,6 @@ export default class MetroMap {
             }
             return Promise.all(elementDrawingPromises)
           })
-        }
         return renderPromise
       })
   }

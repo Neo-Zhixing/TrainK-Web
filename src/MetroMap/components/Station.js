@@ -66,7 +66,40 @@ export default class StationComp extends MapComp {
           )
         })
         // Draw the label
-        this.label = stationContainer.plain(this.station.name).id(null)
+        this.label = stationContainer
+          .text(add => {
+            add.tspan(this.station.name).id(null)
+          })
+          .id(null)
+          .font({
+            family: null,
+          })
+        // Automatically adjusting label position
+        if (this.takenDirs.size !== 8) {
+          // Label Placement Priority List
+          const availableDirs = [6, 2, 0, 4, 7, 5, 1, 3]
+            .filter(dir => !this.takenDirs.has(dir))
+          const labelDir = availableDirs[0]
+          let offsetX = 0
+          let offsetY = 0
+          if (labelDir >= 1 && labelDir <= 3)
+            offsetY = 1
+          else if (labelDir >= 5 && labelDir <= 7)
+            offsetY = -1
+          if (labelDir >= 3 && labelDir <= 5)
+            offsetX = -1
+          else if (labelDir === 7 || labelDir === 0 || labelDir === 1)
+            offsetX = 1
+
+          const labelBox = this.label.bbox()
+          offsetX *= 1.2 * (labelBox.width + iconBox.width) / 2
+          offsetY *= 1.2 * (labelBox.height + iconBox.height) / 2
+          this.label.attr({
+            x: offsetX,
+            y: offsetY,
+          })
+        }
+
         return stationContainer
       })
   }
