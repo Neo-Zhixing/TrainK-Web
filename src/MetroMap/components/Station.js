@@ -1,5 +1,6 @@
 import MapComp from '.'
 import * as models from '../models'
+import { DirectionFromInt } from './Segment'
 
 export default class StationComp extends MapComp {
   constructor (map, container, station) {
@@ -47,7 +48,7 @@ export default class StationComp extends MapComp {
         const iconBox = icon.bbox()
         // Setting up animations
         let timeout = null
-        stationContainer.on('mouseenter', () => {
+        icon.on('mouseenter', () => {
           clearTimeout(timeout)
           timeout = setTimeout(
             () => stationContainer
@@ -56,7 +57,7 @@ export default class StationComp extends MapComp {
             75
           )
         })
-        stationContainer.on('mouseleave', () => {
+        icon.on('mouseleave', () => {
           clearTimeout(timeout)
           timeout = setTimeout(
             () => stationContainer
@@ -77,9 +78,17 @@ export default class StationComp extends MapComp {
         // Automatically adjusting label position
         if (this.takenDirs.size !== 8) {
           // Label Placement Priority List
-          const availableDirs = [6, 2, 0, 4, 7, 5, 1, 3]
-            .filter(dir => !this.takenDirs.has(dir))
-          const labelDir = availableDirs[0]
+          let maxDir = Math.max(...this.takenDirs)
+          const candidateDirs = [...this.takenDirs]
+            .map(value => {
+              if (value < maxDir - 4) value += 8
+              if (value > maxDir) maxDir = value
+              return value
+            })
+          const averageDir = candidateDirs
+            .reduce((sum, value) => sum + value) /
+            candidateDirs.length
+          const labelDir = DirectionFromInt(Math.round(averageDir) + 4)
           let offsetX = 0
           let offsetY = 0
           if (labelDir >= 1 && labelDir <= 3)
@@ -97,6 +106,8 @@ export default class StationComp extends MapComp {
           this.label.attr({
             x: offsetX,
             y: offsetY,
+            caa: candidateDirs,
+            dir: labelDir
           })
         }
 

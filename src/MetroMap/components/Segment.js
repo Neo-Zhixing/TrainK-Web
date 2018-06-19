@@ -13,7 +13,13 @@ export const Direction = Object.freeze({
   Up: 6,
   RightUp: 7,
 })
-
+export function DirectionFromInt (value) {
+  while (value < 0 || value >= 8) {
+    if (value < 0) value += 8
+    if (value >= 8) value -= 8
+  }
+  return value
+}
 // The direction
 function directionForSegment (segment, origin, reverse) {
   // Origin is (0,0) for relative drawings
@@ -32,9 +38,7 @@ function directionForSegment (segment, origin, reverse) {
       )
       let result = Math.round(4 * radian / Math.PI)
       if (reverse) result += 4
-      if (result < 0) result += 8
-      if (result >= 8) result -= 8
-      return result
+      return DirectionFromInt(result)
   }
 }
 
