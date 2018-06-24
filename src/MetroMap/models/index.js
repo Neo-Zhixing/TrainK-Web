@@ -27,6 +27,16 @@ export class Point {
   copy () {
     return new Point(this.x, this.y)
   }
+  add (value) {
+    this.x += value.x
+    this.y += value.y
+    return this
+  }
+  multiply (value) {
+    this.x *= value
+    this.y *= value
+    return this
+  }
 }
 
 export class Size {

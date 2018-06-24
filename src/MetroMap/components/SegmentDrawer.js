@@ -1,6 +1,10 @@
 import { SegmentShape } from '../models'
 
 export default function draw (from, to, shape, radius) {
+  this.from = from
+  this.to = to
+  this.shape = shape
+  this.radius = radius
   const sqrt2 = Math.sqrt(2)
   const width = to.x - from.x
   const height = to.y - from.y
