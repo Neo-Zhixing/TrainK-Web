@@ -17,9 +17,7 @@ export default class StationComp extends MapComp {
           const lineWidth = line.attrs['width']
           const stationWidth = 0.7
           const stationHeight = 0.4
-          let dir = 0
-          for (let i of this.takenDirs)
-            if (i > dir) dir = i
+          const dir = Math.max(...this.takenDirs)
 
           this.icon = container
             .rect(lineWidth * stationWidth, lineWidth * stationHeight)

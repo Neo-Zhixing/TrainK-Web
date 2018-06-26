@@ -45,6 +45,10 @@ export default class MetroMap {
     }
     this.dataloader.loadMap(this.visibleRect)
       .then(data => {
+        data.segments.sort((a, b) => {
+          if (b.shape !== a.shape) return b.shape - a.shape
+          return b.line - a.line
+        })
         for (const key in this.drawers)
           for (const element of data[key]) {
             const drawers = this.drawers[key]

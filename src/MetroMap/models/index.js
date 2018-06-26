@@ -37,6 +37,12 @@ export class Point {
     this.y *= value
     return this
   }
+  distanceTo (point = {x: 0, y: 0}) {
+    const x = this.x - point.x
+    const y = this.y - point.x
+    const sign = Math.abs(y) < Math.pow(1, -10) ? Math.sign(x) : Math.sign(y)
+    return Math.sqrt(x * x + y * y) * sign
+  }
 }
 
 export class Size {

@@ -35,7 +35,8 @@ export default class SegmentComp extends MapComp {
         this.dirs = this.drawer.direction()
         const stationDrawers = this.map.drawers.stations
         const segmentDrawers = this.map.drawers.segments
-        const offsets = ['from', 'to'].map(key => {
+        this.offsets = {}
+        for (const key of ['from', 'to']) {
           // Tell the stations drawers that the direction was taken
           const nodeID = this.segment[key]
           const dir = this.dirs[key]
@@ -56,24 +57,41 @@ export default class SegmentComp extends MapComp {
               return true
             return false
           })
-          const offset = new Point()
-          for (const drawer of cmdDirDrawers) {
-            const deltaOffset = new Point(
-              Math.sin(dir * (1 / 4) * -Math.PI),
-              Math.cos(dir * (1 / 4) * -Math.PI)
-            )
-            if (key === 'to')
-              deltaOffset.multiply(-1)
-            deltaOffset.multiply(drawer.line.attrs.width)
-            offset.add(deltaOffset)
+          if (cmdDirDrawers.length === 0) {
+            this.offsets[key] = new Point()
+            continue
           }
-          return offset
-        })
+          const offsets = cmdDirDrawers.map(d => d.offsets[key])
+          let offsetMin = null
+          let offsetMax = null
+          let offsetMinD = Infinity
+          let offsetMaxD = -Infinity
+          for (const offset of offsets) {
+            const distance = offset.distanceTo()
+            if (distance < offsetMinD) {
+              offsetMinD = distance
+              offsetMin = offset
+            }
+            if (distance > offsetMaxD) {
+              offsetMaxD = distance
+              offsetMax = offset
+            }
+          }
+          const deltaOffset = new Point(
+            Math.sin(dir * (1 / 4) * -Math.PI),
+            Math.cos(dir * (1 / 4) * -Math.PI)
+          )
+          if (deltaOffset.distanceTo() < 0) deltaOffset.multiply(-1)
+          deltaOffset.multiply(line.attrs.width)
+          this.offsets[key] = (Math.abs(offsetMinD) < Math.abs(offsetMaxD))
+            ? offsetMin.copy().add(deltaOffset.multiply(-1))
+            : offsetMax.copy().add(deltaOffset)
+        }
         const path = this.container.path()
           .id('segment-' + this.segment.id)
         this.drawer = new SegmentDrawer(
-          this.drawer.from.add(offsets[0]),
-          this.drawer.to.add(offsets[1]),
+          this.drawer.from.add(this.offsets.from),
+          this.drawer.to.add(this.offsets.to),
           this.drawer.shape,
           this.drawer.radius
         )

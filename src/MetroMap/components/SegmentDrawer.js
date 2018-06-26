@@ -5,14 +5,13 @@ export default function draw (from, to, shape, radius) {
   this.to = to
   this.shape = shape
   this.radius = radius
-  const sqrt2 = Math.sqrt(2)
+  const sqrt2 = Math.SQRT2
   const width = to.x - from.x
   const height = to.y - from.y
   const absWidth = Math.abs(width)
   const absHeight = Math.abs(height)
-  const dir = value => value > 0 ? 1 : -1
-  const dirX = dir(width)
-  const dirY = dir(height)
+  const dirX = Math.sign(width)
+  const dirY = Math.sign(height)
   const curveLeft = {
     x: 0.5 * sqrt2 * radius * dirX + radius * dirX,
     y: 0.5 * sqrt2 * radius * dirY
