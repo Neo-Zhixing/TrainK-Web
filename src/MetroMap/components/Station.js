@@ -64,6 +64,9 @@ export default class StationComp extends MapComp {
             75
           )
         })
+        icon.click(event => {
+          this.map.delegate.selectStation(this.station, event)
+        })
         // Draw the label
         this.label = stationContainer
           .text(add => {
