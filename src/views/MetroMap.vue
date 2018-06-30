@@ -1,11 +1,5 @@
 <template>
-  <div id="metromap-container"
-    @scroll="scrolled"
-    @mousedown="mousedown"
-    @mouseup="mouseup"
-    @mousemove="(dragging ? dragged:moved)($event)"
-    @wheel.prevent="wheel"
-  >
+  <div id="metromap-container">
     <div
       id="station-popover"
       class="popover"
@@ -56,6 +50,10 @@
         </b-badge>
         {{line.name}}
       </b-list-group-item>
+      <embed
+        v-if="selection.station && selection.station.metadata.layout_map"
+        :src="selection.station.metadata.layout_map"
+        type="application/pdf" width="100%" height="600px"/>
       <div slot="modal-footer">
         <b-button-group>
           <b-button variant="primary">Departure</b-button>
@@ -68,17 +66,14 @@
 
 <script>
 import MetroMap from '@/MetroMap'
+import ScrollController from '@/MetroMap/controllers/ViewBoxScrollController'
 import Popper from 'popper.js'
-
-function pointForEvent (event) {
-  return { x: event.clientX, y: event.clientY }
-}
 
 export default {
   data () {
     return {
       map: null,
-      dragging: false,
+      scrollController: null,
       selection: {
         linesForStation: null,
         station: null,
@@ -90,36 +85,15 @@ export default {
   mounted () {
     this.map = new MetroMap(this.$el)
     this.map.delegate = this
-  },
-  methods: {
-    mouseup (event) {
-      if (this.dragging) this.map.loadMap()
-      this.dragging = false
-    },
-    mousedown (event) {
+    this.map.container.on('mousedown', event => {
+      // Clicking the empty area
       if (event.target === this.map.container.node)
         this.unselectAll()
-      this.dragging = true
-      this.map.startMoving(pointForEvent(event))
-    },
-    wheel (event) {
-      this.unselectAll()
-      let scale = event.deltaY * 0.001
-      if (event.deltaMode === 1)
-        scale *= 20 // For compatibility issues on Firefox
-      scale += 1
-      if (scale < 0.1) scale = 0.1
-      this.map.zoom(scale, pointForEvent(event))
-    },
-    scrolled (event) {
-      // Load the map on a displacement-based interval
-    },
-    moved (event) {
-      // Don't have an idea about what to do with it for now.
-    },
-    dragged (event) {
-      this.map.moveTo(pointForEvent(event))
-    },
+    })
+    this.map.container.on('wheel', this.unselectAll)
+    this.scrollController = new ScrollController(this.map)
+  },
+  methods: {
     // Delegate Handlers
     selectStation (station, event) {
       if (this.selection.popover &&
