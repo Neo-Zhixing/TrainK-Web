@@ -65,7 +65,10 @@ export default class StationComp extends MapComp {
           )
         })
         icon.click(event => {
-          this.map.delegate.selectStation(this.station, event)
+          this.map.container.fire('stationClicked', {
+            station: this.station,
+            target: event.target,
+          })
         })
         // Draw the label
         this.label = stationContainer

@@ -22,7 +22,6 @@ export default class ViewBoxScrollController {
     this.dragging = false
   }
   mousedown (event) {
-    console.log('mousedown')
     this.dragging = true
     this.map.startMoving(pointForEvent(event))
   }

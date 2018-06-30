@@ -37,23 +37,37 @@
       </div>
     </div>
     <b-modal
+      hide-backdrop
       id="station-details-modal"
+      size="lg"
       :title="selection.station ? selection.station.name : ''"
       @show="removePopover">
-      <b-list-group-item
-        v-for="line in selection.linesForStation"
-        :key="line.id">
-        <b-badge
-          class="mr-2"
-          :style="{'background-color': line.attrs.color || '#000000'}">
-          New
-        </b-badge>
-        {{line.name}}
-      </b-list-group-item>
-      <embed
-        v-if="selection.station && selection.station.metadata.layout_map"
-        :src="selection.station.metadata.layout_map"
-        type="application/pdf" width="100%" height="600px"/>
+      <b-card no-body>
+        <b-list-group flush>
+          <b-list-group-item
+            v-for="line in selection.linesForStation"
+            :key="line.id">
+            <b-badge
+              class="mr-2"
+              :style="{'background-color': line.attrs.color || '#000000'}">
+              New
+            </b-badge>
+            {{line.name}}
+          </b-list-group-item>
+        </b-list-group>
+        <b-card-body>
+          <a target="metromap-station-map"
+            v-if="selection.station && selection.station.metadata.layout_map"
+            :href="selection.station.metadata.layout_map">
+            Station Layout
+          </a>
+          <a target="metromap-station-map"
+            v-if="selection.station && selection.station.metadata.neighborhood_map"
+            :href="selection.station.metadata.neighborhood_map">
+            Neighborhood
+          </a>
+        </b-card-body>
+      </b-card>
       <div slot="modal-footer">
         <b-button-group>
           <b-button variant="primary">Departure</b-button>
@@ -84,18 +98,18 @@ export default {
   },
   mounted () {
     this.map = new MetroMap(this.$el)
-    this.map.delegate = this
     this.map.container.on('mousedown', event => {
       // Clicking the empty area
       if (event.target === this.map.container.node)
         this.unselectAll()
     })
     this.map.container.on('wheel', this.unselectAll)
+    this.map.container.on('stationClicked', this.selectStation)
     this.scrollController = new ScrollController(this.map)
   },
   methods: {
     // Delegate Handlers
-    selectStation (station, event) {
+    selectStation (event) {
       if (this.selection.popover &&
         this.selection.popover.reference.origin === event.target)
         return
@@ -120,9 +134,11 @@ export default {
           }
         }
       }
-      referenceObj.bbox = event.target.getBBox()
-      referenceObj.rbox = event.target.getBoundingClientRect()
-      referenceObj.origin = event.target
+      const target = event.detail.target
+      const station = event.detail.station
+      referenceObj.bbox = target.getBBox()
+      referenceObj.rbox = target.getBoundingClientRect()
+      referenceObj.origin = target
       station.getLines()
         .then(lines => lines.toArray())
         .then(lines => {
