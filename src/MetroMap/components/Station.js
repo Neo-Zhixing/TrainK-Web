@@ -119,6 +119,7 @@ export default class StationComp extends MapComp {
       })
   }
   get shouldRender () {
-    return this.map.zoom() > (3 - this.station.level) * 0.1
+    return true
+    // return this.map.zoom() > (3 - this.station.level) * 0.1
   }
 }

@@ -17,8 +17,7 @@ export default {
 <style lang="scss">
 @import "~bootstrap/scss/bootstrap";
 @import '~bootstrap-vue/dist/bootstrap-vue.css';
-body{
-  min-height: 100vh;
-  width: 100vw;
+html, body, #app {
+  height: 100%;
 }
 </style>

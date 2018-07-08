@@ -25,8 +25,14 @@ export default class MetroMap {
     this.stationIconSymbols = this.container.group().id('station-icons')
     this.dataloader.getConfiguration()
       .then(config => {
+        this.container.viewbox(
+          Object.assign(config.frame.size, config.frame.origin)
+        )
+        this.container.size(
+          config.frame.size.width,
+          config.frame.size.height,
+        )
         this.visibleRect = config.frame
-        this.updateViewbox()
         if (config.styles)
           this.container.element('style')
             .id(null)
@@ -83,34 +89,5 @@ export default class MetroMap {
 
     this.stationIconPromises.set(level, symbolPromise)
     return symbolPromise
-  }
-
-  // The following methods are being used to manipulate the viewbox
-  updateViewbox () {
-    const rect = this.visibleRect
-    this.container.viewbox({
-      x: rect.origin.x,
-      y: rect.origin.y,
-      width: rect.size.width,
-      height: rect.size.height,
-    })
-  }
-  zoom (scale, point) {
-    if (!scale && !point) return this.container.viewbox().zoom
-    point = this.container.point(point.x, point.y)
-    this.visibleRect.scaleAboutPoint(scale, point)
-    this.updateViewbox()
-    for (const key in this.drawers)
-      this.drawers[key].forEach(drawer => drawer.render())
-  }
-  startMoving (from) {
-    this.movingOrigin = this.container.point(from.x, from.y)
-  }
-  moveTo (to) {
-    if (!this.movingOrigin) return
-    to = this.container.point(to.x, to.y)
-    this.visibleRect.origin.x += this.movingOrigin.x - to.x
-    this.visibleRect.origin.y += this.movingOrigin.y - to.y
-    this.updateViewbox()
   }
 }

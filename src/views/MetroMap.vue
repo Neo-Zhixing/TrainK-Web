@@ -80,7 +80,7 @@
 
 <script>
 import MetroMap from '@/MetroMap'
-import ScrollController from '@/MetroMap/controllers/ViewBoxScrollController'
+import ScrollController from '@/controllers/ScrollController'
 import Popper from 'popper.js'
 
 export default {
@@ -98,14 +98,9 @@ export default {
   },
   mounted () {
     this.map = new MetroMap(this.$el)
-    this.map.container.on('mousedown', event => {
-      // Clicking the empty area
-      if (event.target === this.map.container.node)
-        this.unselectAll()
-    })
-    this.map.container.on('wheel', this.unselectAll)
     this.map.container.on('stationClicked', this.selectStation)
-    this.scrollController = new ScrollController(this.map)
+    this.map.container.on('mousedown', this.unselectAll)
+    this.scrollController = new ScrollController(this.$el, this.map.container)
   },
   methods: {
     // Delegate Handlers
@@ -178,17 +173,16 @@ export default {
 </script>
 
 <style>
-body {
-  height: 100vh;
-}
 #app {
-  height: 100%;
-  width: 100%;
   display: flex;
   flex-direction: column;
 }
-#metromap-container{
-  flex: 1;
-  overflow: hidden;
+#app > nav.navbar {
+  flex: 0 0 auto;
+}
+#metromap-container {
+  flex: 1 1 auto;
+  overflow: scroll;
+  -webkit-overflow-scrolling: touch;
 }
 </style>
