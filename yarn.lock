@@ -2431,6 +2431,10 @@ detect-node@^2.0.3:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/detect-node/-/detect-node-2.0.3.tgz#a2033c09cc8e158d37748fbde7507832bd6ce127"
 
+dexie@^2.0.4:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/dexie/-/dexie-2.0.4.tgz#6027a5e05879424e8f9979d8c14e7420f27e3a11"
+
 diffie-hellman@^5.0.0:
   version "5.0.3"
   resolved "https://registry.yarnpkg.com/diffie-hellman/-/diffie-hellman-5.0.3.tgz#40e8ee98f55a2149607146921c63e1ae5f3d2875"
@@ -6960,6 +6964,10 @@ supports-color@^5.1.0, supports-color@^5.3.0, supports-color@^5.4.0:
 svg.js@^2.6.5:
   version "2.6.5"
   resolved "https://registry.yarnpkg.com/svg.js/-/svg.js-2.6.5.tgz#5b93d0c8c11e2b70812ef9de1562aa91975cc3b6"
+
+"svg.path.js@https://github.com/otm/svg.path.js":
+  version "0.6.2"
+  resolved "https://github.com/otm/svg.path.js#6981166831ac663cf5e43d492b3c0266365ca829"
 
 svgo@^0.7.0:
   version "0.7.2"
